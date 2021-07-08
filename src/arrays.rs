@@ -9,6 +9,7 @@ pub fn run() {
 
     println!("Array length: {}", numbers.len());
 
+    // Arrays are stack allocated
     println!("Array occupies {} bytes", mem::size_of_val(&numbers));
 
     // Get slice

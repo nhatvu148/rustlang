@@ -1,38 +1,49 @@
-use rand::Rng;
-use std::cmp::Ordering;
-use std::io;
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
 
 fn main() {
-    println!("Guess the number!");
+    let (tx, rx) = mpsc::channel();
+    let tx1 = tx.clone();
+    let tx2 = tx.clone();
+    
+    thread::spawn(move || {
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+    });
 
-    let secret_number = rand::thread_rng().gen_range(1..101);
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
 
-    // println!("The secret number is: {}", secret_number);
-
-    loop {
-        println!("Please input your guess.");
-
-        let mut guess = String::new();
-
-        io::stdin()
-            .read_line(&mut guess)
-            .expect("Failed to read line");
-
-        // let guess: u32 = guess.trim().parse().expect("Please type a number!");
-        let guess: u32 = match guess.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-
-        println!("You guessed: {}", guess);
-
-        match guess.cmp(&secret_number) {
-            Ordering::Less => println!("Too small!"),
-            Ordering::Greater => println!("Too big!"),
-            Ordering::Equal => {
-                println!("You win!");
-                break;
-            }
+        for val in vals {
+            tx1.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
         }
+    });
+
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("more"),
+            String::from("messages"),
+            String::from("for"),
+            String::from("you"),
+        ];
+
+        for val in vals {
+            tx2.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+
+    // let received = rx.recv().unwrap();
+    // println!("Got: {}", received);
+
+    for received in rx {
+        println!("Got: {}", received);
     }
 }
